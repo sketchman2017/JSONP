@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang=ru>
+<head>
+    <meta encoding="utf-8">
+</head>
+<body>
+
+<script>
+// Создание запроса по заданному url-адресу и передача обработанных данных 
+// ответа в функцию обратного вызова. Добавление параметра запроса jsonp в URL для
+// задания имени функции обратного вызова для ответа.
+
+function getJSONP(url, callback) {
+    // Создание уникалного имени функции обратного вызова для данного запроса. 
+    //Имя будет свойством этой функции
+
+    var cbnum = "cb" + getJSONP.counter++;
+    var cbname = "getJSONP." + cbnum;
+
+    // Добавление имени функции обратного вызова в url-строку запроса
+
+    if (url.indexOf("?") === -1) {
+        url += "?jsonp=" + cbname;
+    } else {
+        url += "&jsonp=" + cbname;
+    }
+
+    var script = document.createElement("script");
+    
+    // Сама функция обратного вызова (обертка над параметром)
+    getJSONP.cbnum = function(response) {
+        try {
+            callback(respnose);
+        }
+        finally {
+            delete getJSONP.cbnum;
+            script.parentNode.removeChild(script);
+        }
+    };
+
+    // Запуск http запроса через входной параметр url и тег script
+    script.src = url;
+    document.body.appendChild(script);
+}
+
+getJSONP.counter = 0;
+
+getJSONP(
+    "https://api.github.com/users/jeresig",
+    function (e) { console.log(e); }
+);
+</script>
+</body>
